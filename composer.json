@@ -12,5 +12,8 @@
     "require": {
         "drupal/core": "~8.1.0"
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "require-dev": {
+        "drupal/coder": "^8.2"
+    }
 }

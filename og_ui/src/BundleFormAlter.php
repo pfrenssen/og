@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * This docblock is against coding standards.
+ */
+
 namespace Drupal\og_ui;
 
 use Drupal\Component\Utility\Unicode;

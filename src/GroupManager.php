@@ -93,20 +93,21 @@ class GroupManager {
    * Do not access this property directly, use $this->getGroupRelationMap()
    * instead.
    *
-   * @var array $groupRelationMap
-   *   An associative array representing group and group content relations, in
-   *   the following format:
-   *   @code
-   *     [
-   *       'group_entity_type_id' => [
-   *         'group_bundle_id' => [
-   *           'group_content_entity_type_id' => [
-   *             'group_content_bundle_id',
-   *           ],
+   * This mapping is in the following format:
+   * @code
+   *   [
+   *     'group_entity_type_id' => [
+   *       'group_bundle_id' => [
+   *         'group_content_entity_type_id' => [
+   *           'group_content_bundle_id',
    *         ],
    *       ],
-   *     ]
-   *   @endcode
+   *     ],
+   *   ]
+   * @endcode
+   *
+   * @var array $groupRelationMap
+   *   An associative array representing group and group content relations.
    */
   protected $groupRelationMap = [];
 

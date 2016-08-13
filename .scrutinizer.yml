@@ -4,8 +4,6 @@ build:
     tests:
         override:
             - phpcs-run .
-checks:
-    php: false
 tools:
     php_code_sniffer:
         config:

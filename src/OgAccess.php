@@ -172,7 +172,7 @@ class OgAccess implements OgAccessInterface {
     $post_alter_cache = $this->getPermissionsCache($group, $user, FALSE);
 
     // To reduce the number of SQL queries, we cache the user's permissions.
-    if (!empty($pre_alter_cache)) {
+    if (empty($pre_alter_cache)) {
       $permissions = [];
       $user_is_group_admin = FALSE;
       if ($membership = Og::getMembership($group, $user)) {

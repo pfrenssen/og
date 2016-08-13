@@ -224,7 +224,7 @@ class Og {
     $query = \Drupal::entityQuery('og_membership')
       ->condition('uid', $user->id());
 
-    if ($states) {
+    if (!empty($states)) {
       $query->condition('state', $states, 'IN');
     }
 
@@ -449,7 +449,7 @@ class Og {
       ->condition('type', OgGroupAudienceHelper::GROUP_REFERENCE);
 
     // Optionally filter group content entity types.
-    if ($entity_types) {
+    if (!empty($entity_types)) {
       $query->condition('entity_type', $entity_types, 'IN');
     }
 
@@ -675,11 +675,12 @@ class Og {
    * @param string $plugin_id
    *   The plugin ID, which is also the default field name.
    *
-   * @throws \Exception
-   *
    * @return OgFieldBase|bool
    *   An array with the field storage config and field config definitions, or
    *   FALSE if none found.
+   *
+   * @throws \Exception
+   *   Thrown when the requested plugin is not valid.
    */
   protected static function getFieldBaseDefinition($plugin_id) {
     /** @var OgFieldsPluginManager $plugin_manager */
@@ -703,6 +704,8 @@ class Og {
    *   Returns the OG selection handler.
    *
    * @throws \Exception
+   *   Thrown when the passed in field definition is not of a group audience
+   *   field.
    */
   public static function getSelectionHandler(FieldDefinitionInterface $field_definition, array $options = []) {
     if (!OgGroupAudienceHelper::isGroupAudienceField($field_definition)) {

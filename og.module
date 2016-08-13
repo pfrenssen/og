@@ -5,18 +5,14 @@
  * Enable users to create and manage groups with roles and permissions.
  */
 
-use Drupal\user\UserInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\og\Entity\OgMembership;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelper;
-use Drupal\og\OgMembershipInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\user\UserInterface;
 
 /**
  * Group default roles and permissions field.
@@ -130,13 +126,10 @@ function og_entity_create_access(AccountInterface $account, array $context, $bun
     return $access_result;
   }
 
-  if ($entity_type_id == 'node') {
-    $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
-
-    if (!$node_access_strict && $account->hasPermission("create $bundle content")) {
-      // The user has the core permission and strict node access is not set.
-      return AccessResult::neutral();
-    }
+  $node_access_strict = \Drupal::config('og.settings')->get('node_access_strict');
+  if ($entity_type_id == 'node' && !$node_access_strict && $account->hasPermission("create $bundle content")) {
+    // The user has the core permission and strict node access is not set.
+    return AccessResult::neutral();
   }
 
   // We can't check if user has create permissions, as there is no group

@@ -1,3 +1,19 @@
+build:
+    environment:
+        php: '7.0.8'
+    tests:
+        override:
+            - phpcs-run .
+checks:
+    php: true
+coding_style:
+    php:
+        indentation:
+            general:
+                size: 2
+        spaces:
+            around_operators:
+                concatenation: true
 tools:
     php_code_sniffer:
         config:

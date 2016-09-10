@@ -54,7 +54,7 @@ before_script:
   - test ${TEST_SUITE} == "PHP_CodeSniffer" || composer install --working-dir=$DRUPAL_DIR
 
   # Start a web server on port 8888 in the background.
-  - nohup php -S localhost:8888 > /dev/null 2>&1 &
+  - nohup php -S localhost:8888 --docroot $DRUPAL_DIR > /dev/null 2>&1 &
 
   # Wait until the web server is responding.
   - until curl -s localhost:8888; do true; done > /dev/null

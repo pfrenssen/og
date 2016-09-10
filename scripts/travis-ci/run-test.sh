@@ -1,11 +1,7 @@
 #!/bin/bash
 
-echo "DRUPAL_DIR: $DRUPAL_DIR"
-echo "MODULE_DIR: $MODULE_DIR"
-echo $SIMPLETEST_BASE_URL
-echo $SIMPLETEST_DB
-echo  $(pwd)
-ls -al
+# Run either PHPUnit tests or PHP_CodeSniffer tests on Travis CI, depending
+# on the passed in parameter.
 
 case "$1" in
     PHP_CodeSniffer)

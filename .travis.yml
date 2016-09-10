@@ -2,13 +2,27 @@ language: php
 sudo: false
 
 php:
-  - 5.5
   - 5.6
   - 7.0
 
 env:
   - DRUPAL_CORE=8.1.x
   - DRUPAL_CORE=8.2.x
+  - DRUPAL_CORE=8.3.x
+  - TEST=PHPUnit
+  - TEST=PHP_CodeSniffer
+
+# Only run the coding standards check once.
+matrix:
+  exclude:
+    - php: 5.6
+      env: TEST=PHP_CodeSniffer
+    - env:
+      - DRUPAL_CORE=8.2.x
+      - TEST=PHP_CodeSniffer
+    - env:
+      - DRUPAL_CORE=8.3.x
+      - TEST=PHP_CodeSniffer
 
 mysql:
   database: og
@@ -22,7 +36,7 @@ before_script:
   - phpenv config-rm xdebug.ini || true
 
   # Remember the current directory for later use in the Drupal installation.
-  - TESTDIR=$(pwd)
+  - MODULE_DIR=$(pwd)
 
   # Navigate out of module directory to prevent blown stack by recursive module
   # lookup.
@@ -38,11 +52,14 @@ before_script:
   - travis_retry git clone --branch $DRUPAL_CORE --depth 1 https://git.drupal.org/project/drupal.git
   - cd drupal
 
+  # Remember the Drupal installation path.
+  - DRUPAL_DIR=$(pwd)
+
   # Install Composer dependencies.
   - composer self-update && composer install
 
   # Reference OG in the Drupal site.
-  - ln -s $TESTDIR modules/og
+  - ln -s $MODULE_DIR modules/og
 
   # Start a web server on port 8888 in the background.
   - nohup php -S localhost:8888 > /dev/null 2>&1 &
@@ -53,6 +70,6 @@ before_script:
   # Export web server URL for browser tests.
   - export SIMPLETEST_BASE_URL=http://localhost:8888
 
-script:
+script: $MODULE_DIR/scripts/travis-ci/run-test.sh
   # Run the PHPUnit tests which also include the kernel tests.
-  - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/og
+# - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/og

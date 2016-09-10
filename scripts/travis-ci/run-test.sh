@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "DRUPAL_DIR: $DRUPAL_DIR"
+echo "MODULE_DIR: $MODULE_DIR"
+echo  $(pwd)
+
 case "$1" in
     PHP_CodeSniffer)
         cd $MODULE_DIR

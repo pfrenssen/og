@@ -65,28 +65,33 @@ class OgSelection extends DefaultSelection {
     // bundle defined as group.
     $query = $this->getSelectionHandler()->buildEntityQuery($match, $match_operator);
     $target_type = $this->configuration['target_type'];
-    $entityDefinition = \Drupal::entityTypeManager()->getDefinition($target_type);
+    $definition = \Drupal::entityTypeManager()->getDefinition($target_type);
 
-    if ($bundle_key = $entityDefinition->getKey('bundle')) {
-      $bundles = Og::groupManager()->getAllGroupBundles($target_type);
+    if ($bundle_key = $definition->getKey('bundle')) {
+      $bundles = Og::groupTypeManager()->getAllGroupBundles($target_type);
+
+      if (!$bundles) {
+        // If there are no bundles defined, we can return early.
+        return $query;
+      }
       $query->condition($bundle_key, $bundles, 'IN');
     }
 
     $user_groups = $this->getUserGroups();
-    if (!$user_groups) {
+    if (empty($user_groups)) {
       return $query;
     }
 
-    $identifier_key = $entityDefinition->getKey('id');
+    $identifier_key = $definition->getKey('id');
 
     $ids = [];
-    if ($this->configuration['handler_settings']['field_mode'] == 'admin') {
+    if (!empty($this->configuration['handler_settings']['field_mode']) && $this->configuration['handler_settings']['field_mode'] == 'admin') {
       // Don't include the groups, the user doesn't have create permission.
       foreach ($user_groups as $delta => $group) {
         $ids[] = $group->id();
       }
 
-      if ($ids) {
+      if (!empty($ids)) {
         $query->condition($identifier_key, $ids, 'NOT IN');
       }
     }
@@ -95,7 +100,7 @@ class OgSelection extends DefaultSelection {
       foreach ($user_groups as $group) {
         $ids[] = $group->id();
       }
-      if ($ids) {
+      if (!empty($ids)) {
         $query->condition($identifier_key, $ids, 'IN');
       }
       else {
@@ -111,12 +116,14 @@ class OgSelection extends DefaultSelection {
   /**
    * Return all the user's groups.
    *
-   * @return ContentEntityInterface[]
+   * @return \Drupal\Core\Entity\ContentEntityInterface[]
    *   Array with the user's group, or an empty array if none found.
    */
   protected function getUserGroups() {
     $user = User::load($this->currentUser->id());
-    $other_groups = Og::getUserGroups($user);
+    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
+    $membership_manager = \Drupal::service('og.membership_manager');
+    $other_groups = $membership_manager->getUserGroups($user);
     return isset($other_groups[$this->configuration['target_type']]) ? $other_groups[$this->configuration['target_type']] : [];
   }
 

@@ -6,23 +6,16 @@ php:
   - 7.0
 
 env:
-  - DRUPAL_CORE=8.1.x
-  - DRUPAL_CORE=8.2.x
-  - DRUPAL_CORE=8.3.x
-  - TEST=PHPUnit
-  - TEST=PHP_CodeSniffer
+  - TEST_SUITE=8.1.x
+  - TEST_SUITE=8.2.x
+  - TEST_SUITE=8.3.x
+  - TEST_SUITE=PHP_CodeSniffer
 
 # Only run the coding standards check once.
 matrix:
   exclude:
     - php: 5.6
       env: TEST=PHP_CodeSniffer
-    - env:
-      - DRUPAL_CORE=8.2.x
-      - TEST=PHP_CodeSniffer
-    - env:
-      - DRUPAL_CORE=8.3.x
-      - TEST=PHP_CodeSniffer
 
 mysql:
   database: og
@@ -35,8 +28,14 @@ before_script:
   # We also don't care if that file exists or not on PHP 7.
   - phpenv config-rm xdebug.ini || true
 
+  # Make sure Composer is up to date.
+  - composer self-update
+
   # Remember the current directory for later use in the Drupal installation.
   - MODULE_DIR=$(pwd)
+
+  # Install Composer dependencies for OG.
+  - composer install
 
   # Navigate out of module directory to prevent blown stack by recursive module
   # lookup.
@@ -45,21 +44,14 @@ before_script:
   # Create database.
   - mysql -e 'create database og'
 
-  # Export database variable for kernel tests.
-  - export SIMPLETEST_DB=mysql://root:@127.0.0.1/og
-
-  # Download Drupal 8 core.
-  - travis_retry git clone --branch $DRUPAL_CORE --depth 1 https://git.drupal.org/project/drupal.git
-  - cd drupal
+  # Download Drupal 8 core. Skip this for the coding standards test.
+  - test ${TEST_SUITE} == "PHP_CodeSniffer" || travis_retry git clone --branch $TEST_SUITE --depth 1 https://git.drupal.org/project/drupal.git
 
   # Remember the Drupal installation path.
-  - DRUPAL_DIR=$(pwd)
+  - DRUPAL_DIR=$(pwd)/drupal
 
-  # Install Composer dependencies.
-  - composer self-update && composer install
-
-  # Reference OG in the Drupal site.
-  - ln -s $MODULE_DIR modules/og
+  # Install Composer dependencies for core. Skip this for the coding standards test.
+  - test ${TEST_SUITE} == "PHP_CodeSniffer" || composer install --working-dir=$DRUPAL_DIR
 
   # Start a web server on port 8888 in the background.
   - nohup php -S localhost:8888 > /dev/null 2>&1 &
@@ -70,6 +62,7 @@ before_script:
   # Export web server URL for browser tests.
   - export SIMPLETEST_BASE_URL=http://localhost:8888
 
+  # Export database variable for kernel tests.
+  - export SIMPLETEST_DB=mysql://root:@127.0.0.1/og
+
 script: $MODULE_DIR/scripts/travis-ci/run-test.sh
-  # Run the PHPUnit tests which also include the kernel tests.
-# - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/og
